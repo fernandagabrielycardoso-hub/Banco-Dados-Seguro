@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados Seguro - Sistema de Gerenciamento</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>🔒 Banco de Dados Seguro</h1>
+            <p>Sistema Seguro de Gerenciamento de Dados</p>
+        </div>
+    </header>
+
+    <nav class="navbar">
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#login">Login</a></li>
+            <li><a href="#register">Registro</a></li>
+            <li><a href="#dashboard">Dashboard</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <section id="home" class="hero">
+            <h2>Bem-vindo ao Sistema de Banco de Dados Seguro</h2>
+            <p>Proteção de dados com criptografia de ponta a ponta</p>
+            <button class="btn btn-primary" onclick="navigateTo('login')">Começar</button>
+        </section>
+
+        <section id="login" class="form-section">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Entrar</button>
+            </form>
+        </section>
+
+        <section id="register" class="form-section">
+            <h2>Registro</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name">Nome Completo:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email-register">Email:</label>
+                    <input type="email" id="email-register" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password-register">Senha:</label>
+                    <input type="password" id="password-register" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirmar Senha:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </form>
+        </section>
+
+        <section id="dashboard" class="dashboard">
+            <h2>Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>📊 Estatísticas</h3>
+                    <p id="stats">Carregando...</p>
+                </div>
+                <div class="card">
+                    <h3>🔐 Segurança</h3>
+                    <p id="security">Status: OK</p>
+                </div>
+                <div class="card">
+                    <h3>👥 Usuários</h3>
+                    <p id="users">0 usuários ativos</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Banco de Dados Seguro. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
