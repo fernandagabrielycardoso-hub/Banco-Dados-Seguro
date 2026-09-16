@@ -1,0 +1,321 @@
+// ============================================
+// Sistema de Banco de Dados Seguro - Frontend
+// ============================================
+
+// Configurações
+const API_URL = 'http://localhost:8080/api';
+let currentUser = null;
+let isLoggedIn = false;
+
+// ============================================
+// Funções Utilitárias
+// ============================================
+
+/**
+ * Navega entre seções
+ * @param {string} sectionId - ID da seção
+ */
+function navigateTo(sectionId) {
+    // Oculta todas as seções
+    const sections = document.querySelectorAll('.form-section, .dashboard, .hero');
+    sections.forEach(section => {
+        section.classList.remove('active');
+    });
+
+    // Mostra a seção desejada
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
+
+    // Scroll para o topo
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * Exibe notificação
+ * @param {string} message - Mensagem
+ * @param {string} type - Tipo (success, error, warning, info)
+ */
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+/**
+ * Valida email
+ * @param {string} email - Email
+ * @returns {boolean}
+ */
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+/**
+ * Valida senha (mínimo 8 caracteres)
+ * @param {string} password - Senha
+ * @returns {boolean}
+ */
+function validatePassword(password) {
+    return password.length >= 8;
+}
+
+// ============================================
+// Autenticação - Login
+// ============================================
+
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Validação
+        if (!validateEmail(email)) {
+            showNotification('Email inválido', 'error');
+            return;
+        }
+
+        try {
+            // Simular chamada API
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            }).catch(() => {
+                // Fallback para simulação local
+                return {
+                    ok: true,
+                    json: async () => ({
+                        success: true,
+                        token: 'dummy-token-' + Date.now(),
+                        user: { id: 1, email, name: 'Usuário' }
+                    })
+                };
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                currentUser = data.user;
+                isLoggedIn = true;
+
+                // Salvar token
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+                showNotification('Login realizado com sucesso!', 'success');
+                loginForm.reset();
+
+                // Navegar para dashboard
+                setTimeout(() => navigateTo('dashboard'), 1000);
+            } else {
+                showNotification('Email ou senha incorretos', 'error');
+            }
+        } catch (error) {
+            console.error('Erro no login:', error);
+            showNotification('Erro ao fazer login', 'error');
+        }
+    });
+}
+
+// ============================================
+// Autenticação - Registro
+// ============================================
+
+const registerForm = document.getElementById('registerForm');
+if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email-register').value;
+        const password = document.getElementById('password-register').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        // Validações
+        if (!name || name.trim().length < 3) {
+            showNotification('Nome deve ter no mínimo 3 caracteres', 'error');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            showNotification('Email inválido', 'error');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            showNotification('Senha deve ter no mínimo 8 caracteres', 'error');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showNotification('As senhas não correspondem', 'error');
+            return;
+        }
+
+        try {
+            // Simular chamada API
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password })
+            }).catch(() => {
+                // Fallback para simulação local
+                return {
+                    ok: true,
+                    json: async () => ({
+                        success: true,
+                        message: 'Registro realizado com sucesso'
+                    })
+                };
+            });
+
+            if (response.ok) {
+                showNotification('Registro realizado com sucesso! Você pode fazer login agora.', 'success');
+                registerForm.reset();
+
+                // Navegar para login
+                setTimeout(() => navigateTo('login'), 1000);
+            } else {
+                showNotification('Erro ao registrar usuário', 'error');
+            }
+        } catch (error) {
+            console.error('Erro no registro:', error);
+            showNotification('Erro ao registrar', 'error');
+        }
+    });
+}
+
+// ============================================
+// Dashboard
+// ============================================
+
+/**
+ * Carrega dados do dashboard
+ */
+async function loadDashboard() {
+    if (!isLoggedIn) return;
+
+    try {
+        // Simular chamada API
+        const stats = await fetchDashboardStats();
+        
+        // Atualizar elementos
+        const statsElement = document.getElementById('stats');
+        const usersElement = document.getElementById('users');
+        
+        if (statsElement) {
+            statsElement.textContent = `Total de registros: ${stats.totalRecords}`;
+        }
+        
+        if (usersElement) {
+            usersElement.textContent = `${stats.activeUsers} usuários ativos`;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar dashboard:', error);
+    }
+}
+
+/**
+ * Busca estatísticas do dashboard
+ */
+async function fetchDashboardStats() {
+    // Simular dados
+    return {
+        totalRecords: Math.floor(Math.random() * 10000),
+        activeUsers: Math.floor(Math.random() * 100),
+        lastUpdate: new Date().toLocaleString()
+    };
+}
+
+// ============================================
+// Gerenciamento de Dados
+// ============================================
+
+/**
+ * Criptografa dados localmente (simula)
+ * @param {string} data - Dados
+ * @returns {string} Dados criptografados
+ */
+function encryptData(data) {
+    // Implementação básica (em produção usar biblioteca como crypto-js)
+    return btoa(JSON.stringify(data));
+}
+
+/**
+ * Descriptografa dados localmente (simula)
+ * @param {string} encrypted - Dados criptografados
+ * @returns {object} Dados descriptografados
+ */
+function decryptData(encrypted) {
+    try {
+        return JSON.parse(atob(encrypted));
+    } catch (error) {
+        console.error('Erro ao descriptografar:', error);
+        return null;
+    }
+}
+
+// ============================================
+// Inicialização
+// ============================================
+
+/**
+ * Inicializa a aplicação
+ */
+function initApp() {
+    // Verificar se usuário está logado
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('currentUser');
+
+    if (token && user) {
+        try {
+            currentUser = JSON.parse(user);
+            isLoggedIn = true;
+            console.log('Usuário restaurado:', currentUser.name);
+        } catch (error) {
+            console.error('Erro ao restaurar usuário:', error);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+        }
+    }
+
+    // Carregar dashboard se logado
+    if (isLoggedIn) {
+        loadDashboard();
+    } else {
+        navigateTo('home');
+    }
+}
+
+// Executar quando DOM estiver pronto
+document.addEventListener('DOMContentLoaded', initApp);
+
+// ============================================
+// Exportar funções (para uso em módulos)
+// ============================================
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        navigateTo,
+        showNotification,
+        validateEmail,
+        validatePassword,
+        encryptData,
+        decryptData,
+        loadDashboard
+    };
+}
